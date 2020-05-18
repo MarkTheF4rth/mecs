@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <div class="jumbotron text-center">
+        <h1>Welcome To FlaskApp</h1>
+        <p class="lead">This app is built using Python Flask</p>
+    </div>
+    <table style="width:100%">
+        <thead>
+            <tr>
+                <th>time_dif</th>
+                <th>data_center</th>
+                <th>subsection</th>
+                <th>event</th>
+                <th>level</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for json in data %}
+            <tr>
+                <td>{{json.time_dif}}</td>
+                <td>{{json.data_center}}</td>
+                <td>{{json.subsection}}</td>
+                <td>{{json.event}}</td>
+                <td>{{json.level}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

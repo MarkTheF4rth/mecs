@@ -1,0 +1,100 @@
+# Docker Compose description of the combined application.
+#
+# 'docker-compose up' will run this.
+version: '3'  # requires Docker Compose 1.13 or later
+
+services:
+  rabbitmq:
+    # This variant is built on Alpine Linux (it's smaller) and includes
+    # the management UI.
+    image: 'rabbitmq:3-management-alpine'
+    ports:
+      # The standard AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - rabbitmqnetwork
+
+  webclient:
+    image: ucncsteam17/webclient:0.1.1
+    environment:
+      API_ENDPOINT: 'http://localhost:5000/'
+    ports:
+      - '8080:8080'
+    networks:
+      - rabbitmqnetwork
+
+  webapi:
+    image: ucncsteam17/webapi:0.0.1
+    ports:
+      - '5000:5000'
+    networks:
+      - rabbitmqnetwork
+
+  databaseconsumer:
+    image: ucncsteam17/sqlite-event-database:0.0.2
+    environment:
+      SQLITE_DB_LOC: '/storage/sqlite3-database/mecs.db'
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+    volumes:
+      - ./sqlite3-database:/storage/sqlite3-database
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+  webconsumer:
+    image: ucncsteam17/webconsumer:0.0.1
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+      API_ENDPOINT: 'http://webapi:5000/update'
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+  gateway:
+    image: ucncsteam17/gateway:0.0.3
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+      PYTHON_BUFFERED: 0
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+  # publishes fake data to a queue
+  fakedata:
+    image: ucncsteam17/fakedata:0.0.2
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+      PTYHON_BUFFERED: 0
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+  # publishes simulated kibana events to a queue
+  kibanaevents:
+    image: ucncsteam17/kibanaevents:0.0.1
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+      PYTHON_BUFFERED: 0
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+  ringdumpevents:
+    image: ucncsteam17/ringdumpevents:0.0.1
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=10'
+      PYTHON_BUFFERED: 0
+    depends_on:
+      - "rabbitmq"
+    networks:
+      - rabbitmqnetwork
+
+networks:
+  rabbitmqnetwork: {}

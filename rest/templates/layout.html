@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        
+        th, td {
+          padding: 15px;
+        }
+        </style>
+        <meta charset="utf-8">
+        <title>Flask App</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    </head>
+    <body>
+    {% include 'includes/_navbar.html' %}
+    <div class="container">
+        {% block body %}{% endblock %}
+    </div>
+    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"</script>
+    </body>
+</html>
